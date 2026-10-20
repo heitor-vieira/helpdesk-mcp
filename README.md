@@ -1,0 +1,1 @@
+O objetivo desse servidor MCP é basicamente ajudar uma empresa a gerir os chamados feitos pelos colaboradores e facilitar a manipulação dos mesmos.
