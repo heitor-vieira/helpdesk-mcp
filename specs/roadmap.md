@@ -1,28 +1,54 @@
 # Roadmap
 
-O desenvolvimento será dividido em três fases pequenas e sequenciais. Cada
-fase será detalhada e implementada individualmente quando chegar sua vez.
+O desenvolvimento está dividido em três fases sequenciais. Cada fase deve ter
+requisitos e cenários de validação detalhados antes de sua implementação.
+Decisões que se aplicam a mais de uma fase ficam na [missão](./missao.md) ou na
+[pilha de tecnologia](./pilha-tecnologia.md), não apenas neste roadmap.
 
-## Fase 1 — Listar chamados
+## Fase 1 — Listar chamados — concluída
 
 - **Tool:** `listar_chamados`, com filtro opcional por status.
-- **Objetivo:** permitir consultar os chamados existentes, com a opção de
-  restringir a lista a um status.
-- **Critério geral de conclusão:** a tool lista os chamados e, quando
-  informada, aplica corretamente o filtro por status.
+- **Objetivo:** consultar os chamados existentes, com a opção de restringir a
+  lista a um status permitido.
+- **Critérios atendidos:** lista todos os chamados sem filtro; filtra por cada
+  status permitido; rejeita status inválido; retorna lista vazia quando não há
+  correspondências; registra um evento de consulta por chamado retornado.
+- **Validação:** os oito testes automatizados passam. A tool foi chamada por um
+  cliente MCP e os resultados foram comparados com SQLite e com
+  [validacao.md](./01-listar-chamados/validacao.md).
 
-## Fase 2 — Buscar histórico de cliente
+## Fase 2 — Buscar chamados por cliente
 
 - **Tool:** `buscar_historico_cliente`.
-- **Objetivo:** consultar o histórico de chamados associado a um cliente; aqui,
-  “histórico” significa os chamados desse cliente, não os eventos internos de
-  auditoria.
-- **Critério geral de conclusão:** a tool retorna os chamados correspondentes
-  ao cliente informado.
+- **Objetivo:** consultar os chamados associados ao nome de cliente informado.
+  “Histórico” significa os próprios chamados, não os eventos de
+  `ticket_history`.
+- **Critérios de conclusão:**
+  - usar correspondência exata de `client_name`, sem busca parcial;
+  - retornar todos os chamados correspondentes, ordenados por `ticket_id`, com
+    os seis campos do modelo `tickets`;
+  - retornar `[]` se não houver correspondências;
+  - registrar exatamente um evento `consulta` por chamado retornado e nenhum
+    evento quando o resultado estiver vazio;
+  - não alterar os chamados.
+- **Preparação:** detalhar entrada, saída, erros e cenários de validação em
+  especificações próprias antes de implementar a tool.
 
 ## Fase 3 — Atualizar status
 
 - **Tool:** `atualizar_status`.
-- **Objetivo:** alterar o status de um chamado existente.
-- **Critério geral de conclusão:** a tool atualiza o status do chamado
-  identificado e permite confirmar o novo status.
+- **Objetivo:** alterar o status de um chamado existente para um valor
+  permitido.
+- **Critérios de conclusão:**
+  - validar o identificador do chamado e aceitar somente os status definidos
+    na [pilha de tecnologia](./pilha-tecnologia.md);
+  - informar erro quando o chamado não existir ou o status for inválido;
+  - em uma atualização efetiva, alterar `status` e `updated_at`, registrar um
+    evento `atualizacao` com valores anterior e novo, e retornar o chamado
+    atualizado;
+  - persistir a alteração e seu evento de auditoria atomicamente;
+  - se o status solicitado já for o atual, tratar a operação como sem
+    alteração: manter `updated_at`, não criar evento e retornar o chamado
+    inalterado.
+- **Preparação:** detalhar entrada, saída, erros e cenários de validação em
+  especificações próprias antes de implementar a tool.

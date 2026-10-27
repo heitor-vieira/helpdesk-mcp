@@ -1,4 +1,4 @@
-# Pilha de tecnologia
+# Constituição técnica
 
 Este documento registra as decisões técnicas para a implementação inicial do
 servidor Helpdesk MCP. A solução é local e demonstrativa, conforme os limites
@@ -26,6 +26,8 @@ descritos em [missao.md](./missao.md).
 Usar **SQLite** para persistir os chamados em um arquivo local ao projeto,
 `data/helpdesk.db`. O banco deve ser criado automaticamente na inicialização,
 incluindo as tabelas e registros fictícios iniciais quando ainda não existirem.
+O esquema atual atende às fases de busca por cliente e atualização de status;
+essas fases não exigem uma tabela `clients` nem uma migração de esquema.
 
 O modelo inicial deve conter:
 
@@ -44,11 +46,18 @@ Todos os campos de `tickets` são obrigatórios.
 
 Os valores de status permitidos são `aberto`, `em_andamento`, `resolvido` e
 `fechado`. A implementação deve rejeitar estados fora dessa lista.
+Não há uma matriz de transições nesta versão: qualquer status permitido pode
+ser definido a partir de qualquer status atual.
 
 A busca de histórico por cliente consulta os chamados associados ao
 `client_name`; ela não representa a consulta dos eventos de auditoria da
 tabela `ticket_history`. A atualização prevista no escopo inicial altera o
 status de um chamado existente.
+
+Como não há uma entidade separada de cliente, a busca por cliente deve usar
+correspondência exata do texto de `client_name`, sem correspondência parcial.
+Nomes repetidos são permitidos e a busca retorna todos os chamados com o nome
+correspondente. A busca não cria, altera ou exclui dados.
 
 ### `ticket_history`
 
@@ -68,6 +77,14 @@ chamados, registrar um evento por chamado retornado. Uma atualização deve
 preservar os eventos anteriores e registrar apenas os campos efetivamente
 alterados. Como não há autenticação real, o histórico não deve presumir uma
 identidade de usuário.
+
+Uma atualização efetiva de status e seu evento `atualizacao` devem ser
+persistidos na mesma transação: ou ambos são confirmados, ou nenhum deles é.
+O evento deve identificar o status anterior e o novo, com horário em UTC. Se
+o chamado solicitado não existir, a operação deve informar erro. Se o status
+já for o atual, a operação é sem alteração: não modifica `updated_at` e não
+registra evento de atualização. O registro do evento não deve substituir nem
+apagar eventos anteriores.
 
 Para manter o exemplo simples, `client_name` fica diretamente no chamado,
 sem uma tabela separada de clientes. `details` é texto legível, sem exigir um
