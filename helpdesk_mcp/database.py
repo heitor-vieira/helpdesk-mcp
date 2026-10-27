@@ -162,3 +162,28 @@ def list_tickets(
             ((row["ticket_id"], occurred_at) for row in rows),
         )
         return [dict(row) for row in rows]
+
+
+def find_tickets_by_client(
+    client_name: str, db_path: Path = DEFAULT_DB_PATH
+) -> list[dict[str, Any]]:
+    with _connect(Path(db_path)) as connection:
+        rows = connection.execute(
+            """
+            SELECT ticket_id, client_name, description, status, created_at, updated_at
+            FROM tickets
+            WHERE client_name = ?
+            ORDER BY ticket_id
+            """,
+            (client_name,),
+        ).fetchall()
+
+        occurred_at = _utc_now()
+        connection.executemany(
+            """
+            INSERT INTO ticket_history (ticket_id, action, occurred_at)
+            VALUES (?, 'consulta', ?)
+            """,
+            ((row["ticket_id"], occurred_at) for row in rows),
+        )
+        return [dict(row) for row in rows]

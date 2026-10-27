@@ -17,7 +17,7 @@ Decisões que se aplicam a mais de uma fase ficam na [missão](./missao.md) ou n
   cliente MCP e os resultados foram comparados com SQLite e com
   [validacao.md](./01-listar-chamados/validacao.md).
 
-## Fase 2 — Buscar chamados por cliente
+## Fase 2 — Buscar chamados por cliente — concluída
 
 - **Tool:** `buscar_historico_cliente`.
 - **Objetivo:** consultar os chamados associados ao nome de cliente informado.
@@ -31,8 +31,11 @@ Decisões que se aplicam a mais de uma fase ficam na [missão](./missao.md) ou n
   - registrar exatamente um evento `consulta` por chamado retornado e nenhum
     evento quando o resultado estiver vazio;
   - não alterar os chamados.
-- **Preparação:** detalhar entrada, saída, erros e cenários de validação em
-  especificações próprias antes de implementar a tool.
+- **Validação:** os seis testes da fase 2 e os oito testes de regressão da
+  fase 1 passam. A tool foi chamada por MCP `stdio`: `Ana Souza` retornou os
+  chamados 1 e 5, conferidos contra SQLite; `Cliente inexistente` retornou
+  `[]`. Os requisitos e demais cenários estão em
+  [validacao.md](./02-historico-cliente/validacao.md).
 
 ## Fase 3 — Atualizar status
 

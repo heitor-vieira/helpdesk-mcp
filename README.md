@@ -1,10 +1,9 @@
 # Helpdesk MCP
 
-Servidor MCP local para demonstração de gestão de chamados. Nesta primeira
-fase, a tool `listar_chamados` lista chamados persistidos em SQLite e permite
-filtrar pelo status `aberto`, `em_andamento`, `resolvido` ou `fechado`.
-Chamados fictícios são adicionados na primeira inicialização; reiniciar o
-servidor não restaura nem substitui chamados alterados ou removidos.
+Servidor MCP local para demonstração de gestão de chamados. O servidor permite
+listar chamados, filtrar por status e consultar os chamados de um cliente pelo
+nome exato. Chamados fictícios são adicionados na primeira inicialização;
+reiniciar o servidor não restaura nem substitui chamados alterados ou removidos.
 
 ## Requisitos
 
@@ -33,7 +32,7 @@ python -m helpdesk_mcp.server
 O servidor usa o transporte MCP `stdio`; por isso, mensagens do protocolo
 ocupam `stdout`. O arquivo `data/helpdesk.db` e suas tabelas são criados
 automaticamente. A tabela `ticket_history` registra a criação inicial e cada
-consulta que efetivamente retorna chamados.
+consulta que efetivamente retorna chamados, incluindo a busca por cliente.
 
 ## Testes
 
@@ -59,12 +58,16 @@ Peça explicitamente ao agente para usar a tool MCP, por exemplo:
 - “Use a tool MCP `listar_chamados` para listar todos os chamados.”
 - “Use a tool MCP `listar_chamados` com status `aberto`.”
 - “Use a tool MCP `listar_chamados` com status `pendente`.”
+- “Use a tool MCP `buscar_historico_cliente` para consultar os chamados de
+  `Ana Souza`.”
+- “Use a tool MCP `buscar_historico_cliente` para consultar
+  `Cliente inexistente`.”
 
 Expanda cada chamada na conversa e confirme que ela pertence ao servidor
 `helpdesk-mcp` e retornou o resultado. Uma resposta plausível sem a chamada
-visível não comprova o uso do MCP. As duas primeiras consultas devem refletir
-os registros em `data/helpdesk.db`; a última deve apresentar erro de validação,
-pois `pendente` não é um status permitido.
+visível não comprova o uso do MCP. `listar_chamados` com status `pendente`
+deve apresentar erro de validação; `buscar_historico_cliente` exige o nome
+exato do cliente e retorna `[]` quando não há correspondências.
 
 O comando configurado no arquivo usa o caminho de executável do ambiente
 virtual para Linux/macOS. No Windows, altere `command` para
