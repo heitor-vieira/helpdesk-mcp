@@ -48,9 +48,23 @@ python -m unittest discover -s tests -v
 
 O workspace inclui `.vscode/mcp.json`, que registra o servidor como
 `helpdesk-mcp` usando `.venv`. Depois de criar o ambiente e instalar as
-dependências, abra o workspace no VS Code, abra o arquivo `mcp.json` e use a
-ação **Start** exibida pelo editor (ou reinicie o VS Code). A tool
-`listar_chamados` ficará disponível para clientes MCP no workspace.
+dependências, abra o workspace no VS Code e use a ação **Start** exibida no
+arquivo `mcp.json` (ou reinicie o VS Code). Revise e aprove a configuração de
+confiança do servidor local quando solicitado.
+
+Para usar a tool no Copilot Chat, selecione o modo **Agent** e confirme em
+**Configure Tools** que `helpdesk-mcp` / `listar_chamados` está habilitada.
+Peça explicitamente ao agente para usar a tool MCP, por exemplo:
+
+- “Use a tool MCP `listar_chamados` para listar todos os chamados.”
+- “Use a tool MCP `listar_chamados` com status `aberto`.”
+- “Use a tool MCP `listar_chamados` com status `pendente`.”
+
+Expanda cada chamada na conversa e confirme que ela pertence ao servidor
+`helpdesk-mcp` e retornou o resultado. Uma resposta plausível sem a chamada
+visível não comprova o uso do MCP. As duas primeiras consultas devem refletir
+os registros em `data/helpdesk.db`; a última deve apresentar erro de validação,
+pois `pendente` não é um status permitido.
 
 O comando configurado no arquivo usa o caminho de executável do ambiente
 virtual para Linux/macOS. No Windows, altere `command` para
