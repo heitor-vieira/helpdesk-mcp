@@ -52,7 +52,9 @@ ser definido a partir de qualquer status atual.
 A busca de histórico por cliente consulta os chamados associados ao
 `client_name`; ela não representa a consulta dos eventos de auditoria da
 tabela `ticket_history`. A atualização prevista no escopo inicial altera o
-status de um chamado existente.
+somente o `status` e o `updated_at` da linha do chamado existente. Não há uma
+matriz de transições: qualquer status permitido pode suceder qualquer outro
+status permitido.
 
 Como não há uma entidade separada de cliente, a busca por cliente deve usar
 correspondência exata do texto de `client_name`, sem correspondência parcial.
@@ -74,17 +76,19 @@ Todos os campos de `ticket_history`, exceto `details`, são obrigatórios.
 Registrar no histórico a criação dos chamados, as consultas que retornem
 chamados e cada atualização realizada. Em consultas que retornem vários
 chamados, registrar um evento por chamado retornado. Uma atualização deve
-preservar os eventos anteriores e registrar apenas os campos efetivamente
-alterados. Como não há autenticação real, o histórico não deve presumir uma
-identidade de usuário.
+acrescentar um evento `atualizacao` ao histórico, preservando todos os eventos
+anteriores. Para operações normais, `ticket_history` é append-only: eventos
+existentes nunca são atualizados nem apagados. Como não há autenticação real,
+o histórico não deve presumir uma identidade de usuário.
 
 Uma atualização efetiva de status e seu evento `atualizacao` devem ser
 persistidos na mesma transação: ou ambos são confirmados, ou nenhum deles é.
-O evento deve identificar o status anterior e o novo, com horário em UTC. Se
-o chamado solicitado não existir, a operação deve informar erro. Se o status
-já for o atual, a operação é sem alteração: não modifica `updated_at` e não
-registra evento de atualização. O registro do evento não deve substituir nem
-apagar eventos anteriores.
+O evento deve identificar em `details`, como texto legível, o status anterior
+e o novo, e registrar o horário em UTC. Se o chamado solicitado não existir,
+a operação deve informar erro explícito, sem alterar dados nem registrar
+evento. Se o status solicitado já for o atual, a operação é sem alteração:
+não modifica `updated_at`, não registra evento de atualização e retorna o
+registro atual do chamado.
 
 Para manter o exemplo simples, `client_name` fica diretamente no chamado,
 sem uma tabela separada de clientes. `details` é texto legível, sem exigir um

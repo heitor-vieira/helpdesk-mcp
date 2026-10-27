@@ -44,14 +44,20 @@ Decisões que se aplicam a mais de uma fase ficam na [missão](./missao.md) ou n
   permitido.
 - **Critérios de conclusão:**
   - validar o identificador do chamado e aceitar somente os status definidos
-    na [pilha de tecnologia](./pilha-tecnologia.md);
-  - informar erro quando o chamado não existir ou o status for inválido;
-  - em uma atualização efetiva, alterar `status` e `updated_at`, registrar um
-    evento `atualizacao` com valores anterior e novo, e retornar o chamado
-    atualizado;
+    na [pilha de tecnologia](./pilha-tecnologia.md); não aplicar matriz de
+    transição, permitindo qualquer status válido a partir de qualquer status
+    atual;
+  - informar erro explícito para status inválido ou chamado inexistente; no
+    caso de chamado inexistente, não alterar dados nem registrar evento;
+  - em uma atualização efetiva, alterar somente `status` e `updated_at` na
+    linha de `tickets`, acrescentar um evento `atualizacao` a
+    `ticket_history` sem atualizar ou apagar eventos anteriores e retornar o
+    chamado atualizado;
+  - registrar em `details`, como texto legível, os valores anterior e novo do
+    status;
   - persistir a alteração e seu evento de auditoria atomicamente;
   - se o status solicitado já for o atual, tratar a operação como sem
-    alteração: manter `updated_at`, não criar evento e retornar o chamado
-    inalterado.
+    alteração: manter `updated_at`, não criar evento e retornar o registro
+    atual.
 - **Preparação:** detalhar entrada, saída, erros e cenários de validação em
   especificações próprias antes de implementar a tool.
